@@ -1,5 +1,5 @@
 // ─── API Base ──────────────────────────────────────────────────────────────────
-const API = "http://localhost:5000/api";
+const API = "https://school-management-kb90.onrender.com/api";
 
 // ─── Token helpers ─────────────────────────────────────────────────────────────
 const getToken  = ()        => localStorage.getItem("token");
