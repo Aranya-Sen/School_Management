@@ -33,29 +33,9 @@ school-management/
 
 ---
 
-## 🚀 Setup & Run
-
-### 1. Install dependencies
-
-```bash
-cd backend
-npm install
-```
-
-### 2. Start the server
-
-```bash
-npm start
-# or for live-reload during development:
-npm run dev
-```
-
-### 3. Open in browser
-
-```
-http://localhost:5000
-```
-
+## Deployed Link
+---
+https://school-management-kb90.onrender.com/
 ---
 
 ## 🔑 Default Credentials
@@ -124,11 +104,3 @@ http://localhost:5000
 - Password reset tokens expire in **1 hour**
 - In production: set `JWT_SECRET` env variable and send reset tokens via email (nodemailer is included)
 
----
-
-## 🔧 Environment Variables
-
-| Variable    | Default                          | Description      |
-|-------------|----------------------------------|------------------|
-| PORT        | 5000                             | Server port      |
-| JWT_SECRET  | school_secret_key_change_in_prod | JWT signing key  |
