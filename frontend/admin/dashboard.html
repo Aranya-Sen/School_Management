@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+
+<!-- ── Sidebar ────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-brand"><span>🛡️</span> Admin Panel</div>
+  <nav>
+    <a href="#" class="active" onclick="showSection('dashboard')">📊 Dashboard</a>
+    <div class="nav-section">Students</div>
+    <a href="#" onclick="showSection('students')">👥 All Students</a>
+    <div class="nav-section">Finance</div>
+    <a href="#" onclick="showSection('fees')">💰 Manage Fees</a>
+    <div class="nav-section">Attendance</div>
+    <a href="#" onclick="showSection('attendance')">📅 Attendance</a>
+    <div class="nav-section">Account</div>
+    <a href="#" onclick="showSection('profile')">👤 My Profile</a>
+    <div class="nav-section">Admins</div>
+    <a href="#" onclick="showSection('admins')">🛡️ Manage Admins</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">Admin</div>
+    <div class="user-name" id="sidebar-name">—</div>
+    <button class="btn btn-outline btn-sm" style="margin-top:8px;width:100%" onclick="logout()">Logout</button>
+  </div>
+</aside>
+
+<!-- ── Main ───────────────────────────────────────────────────── -->
+<main class="main-content">
+
+  <!-- DASHBOARD -->
+  <section id="s-dashboard">
+    <div class="page-header"><h1>Admin Dashboard</h1><p>System overview</p></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon blue">👥</div><div><div class="stat-value" id="stat-students">—</div><div class="stat-label">Total Students</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">💰</div><div><div class="stat-value" id="stat-fees-paid">—</div><div class="stat-label">Fees Collected</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">⏳</div><div><div class="stat-value" id="stat-fees-due">—</div><div class="stat-label">Fees Pending</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow">📅</div><div><div class="stat-value" id="stat-today-att">—</div><div class="stat-label">Present Today</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>Recent Students</h2><button class="btn btn-primary btn-sm" onclick="showSection('students')">View All</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Name</th><th>Roll No</th><th>Class</th><th>Email</th></tr></thead><tbody id="dash-students"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- STUDENTS -->
+  <section id="s-students" style="display:none">
+    <div class="page-header"><h1>Manage Students</h1></div>
+    <div id="alert-students" class="alert"></div>
+    <div class="card">
+      <div class="card-header"><h2>All Students</h2><button class="btn btn-primary btn-sm" onclick="openAddStudent()">+ Add Student</button></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Roll No</th><th>Class</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
+          <tbody id="students-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEES -->
+  <section id="s-fees" style="display:none">
+    <div class="page-header"><h1>Manage Fees</h1></div>
+    <div id="alert-fees" class="alert"></div>
+    <div class="card">
+      <div class="card-header"><h2>Fee Records</h2><button class="btn btn-primary btn-sm" onclick="openAddFee()">+ Add Fee</button></div>
+      <div class="filter-bar">
+        <select id="fee-filter-student" class="form-control" onchange="loadFees()">
+          <option value="">All Students</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Student</th><th>Roll</th><th>Description</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="fees-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section id="s-attendance" style="display:none">
+    <div class="page-header"><h1>Manage Attendance</h1></div>
+    <div id="alert-att" class="alert"></div>
+    <div class="card">
+      <div class="card-header"><h2>Attendance Records</h2><button class="btn btn-primary btn-sm" onclick="openAddAtt()">+ Add Attendance</button></div>
+      <div class="filter-bar">
+        <select id="att-filter-student" class="form-control" onchange="loadAttendance()">
+          <option value="">All Students</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Student</th><th>Roll</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="att-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="s-profile" style="display:none">
+    <div class="page-header"><h1>My Profile</h1></div>
+    <div id="alert-profile" class="alert"></div>
+    <div class="card" style="max-width:440px">
+      <div class="form-group"><label>Name</label><input id="ap-name" class="form-control" /></div>
+      <div class="form-group"><label>Email</label><input id="ap-email" class="form-control" disabled /></div>
+      <div class="form-group"><label>Phone</label><input id="ap-phone" class="form-control" /></div>
+      <button class="btn btn-primary" onclick="saveAdminProfile()">Save Changes</button>
+    </div>
+  </section>
+
+  <!-- ADMINS -->
+<section id="s-admins" style="display:none">
+  <div class="page-header"><h1>Manage Admins</h1></div>
+  <div id="alert-admins" class="alert"></div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>All Admins</h2>
+      <button class="btn btn-primary btn-sm" onclick="openAddAdmin()">+ Add Admin</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+          </tr>
+        </thead>
+        <tbody id="admins-table"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ── Modals ─────────────────────────────────────────────────── -->
+
+<!-- Add/Edit Student -->
+<div id="modal-student" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3 id="student-modal-title">Add Student</h3><button class="modal-close" onclick="closeModal('modal-student')">×</button></div>
+    <div id="alert-student-modal" class="alert"></div>
+    <input type="hidden" id="edit-student-id" />
+    <div class="form-row">
+      <div class="form-group"><label>Full Name *</label><input id="sm-name" class="form-control" /></div>
+      <div class="form-group"><label>Email *</label><input id="sm-email" type="email" class="form-control" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Roll Number *</label><input id="sm-roll" class="form-control" /></div>
+      <div class="form-group"><label>Password *</label><input id="sm-pass" type="password" class="form-control" placeholder="Leave blank to keep" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Class *</label><input id="sm-class" class="form-control" /></div>
+      <div class="form-group"><label>Section *</label><input id="sm-section" class="form-control" /></div>
+    </div>
+    <div class="form-group"><label>Phone</label><input id="sm-phone" class="form-control" /></div>
+    <div class="form-group"><label>Address</label><textarea id="sm-address" class="form-control" rows="2"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-student')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Student -->
+<div id="modal-view-student" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Student Profile</h3><button class="modal-close" onclick="closeModal('modal-view-student')">×</button></div>
+    <div id="view-student-content"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-view-student')">Close</button></div>
+  </div>
+</div>
+
+<!-- Add/Edit Fee -->
+<div id="modal-fee" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3 id="fee-modal-title">Add Fee</h3><button class="modal-close" onclick="closeModal('modal-fee')">×</button></div>
+    <div id="alert-fee-modal" class="alert"></div>
+    <input type="hidden" id="edit-fee-id" />
+    <div class="form-group"><label>Student *</label>
+      <select id="fm-student" class="form-control"></select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Amount (₹) *</label><input id="fm-amount" type="number" class="form-control" /></div>
+      <div class="form-group"><label>Due Date *</label><input id="fm-due" type="date" class="form-control" /></div>
+    </div>
+    <div class="form-group"><label>Description *</label><input id="fm-desc" class="form-control" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Status</label>
+        <select id="fm-status" class="form-control"><option value="pending">Pending</option><option value="paid">Paid</option><option value="overdue">Overdue</option></select></div>
+      <div class="form-group"><label>Paid Date</label><input id="fm-paid" type="date" class="form-control" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-fee')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFee()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Attendance -->
+<div id="modal-att" class="modal-overlay">
+  <div class="modal" style="max-width:800px">
+    <div class="modal-header">
+      <h3>Take Attendance</h3>
+      <button class="modal-close" onclick="closeModal('modal-att')">×</button>
+    </div>
+
+    <div class="form-group">
+      <label>Date *</label>
+      <input id="bulk-date" type="date" class="form-control" />
+    </div>
+
+    <div class="table-wrap" style="max-height:400px; overflow:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="bulk-att-table"></tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-att')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBulkAttendance()">Save All</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Admin -->
+<div id="modal-admin" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Admin</h3>
+      <button class="modal-close" onclick="closeModal('modal-admin')">×</button>
+    </div>
+
+    <div id="alert-admin-modal" class="alert"></div>
+
+    <div class="form-group">
+      <label>Name *</label>
+      <input id="am-name" class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label>Email *</label>
+      <input id="am-email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label>Password *</label>
+      <input id="am-password" type="password" class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label>Phone</label>
+      <input id="am-phone" class="form-control" />
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-admin')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAdmin()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/js/api.js"></script>
+<script>
+requireAuth("admin", "/index.html");
+const admin = getUser();
+if (admin) document.getElementById("sidebar-name").textContent = admin.name;
+
+let allStudents = [];
+
+const sectionKeys = ["dashboard","students","fees","attendance","profile","admins"];
+function showSection(name) {
+  sectionKeys.forEach(s => document.getElementById("s-"+s).style.display = s===name?"block":"none");
+  document.querySelectorAll(".sidebar nav a").forEach(a => a.classList.remove("active"));
+  if (name==="dashboard")  { loadDashboard(); }
+  if (name==="students")   { loadStudents(); }
+  if (name==="fees")       { populateStudentFilter("fee-filter-student"); loadFees(); }
+  if (name==="attendance") { populateStudentFilter("att-filter-student"); loadAttendance(); }
+  if (name==="profile")    { loadAdminProfile(); }
+  if (name==="admins")     { loadAdmins(); }
+}
+
+// ── Dashboard ────────────────────────────────────────────────────
+async function loadDashboard() {
+  const [students, fees, att] = await Promise.all([
+    apiFetch("/admin/students"), apiFetch("/fees"), apiFetch("/attendance")
+  ]);
+  allStudents = students;
+  document.getElementById("stat-students").textContent = students.length;
+  document.getElementById("stat-fees-paid").textContent = fmtAmount(fees.filter(f=>f.status==="paid").reduce((s,f)=>s+f.amount,0));
+  document.getElementById("stat-fees-due").textContent  = fees.filter(f=>f.status==="pending"||f.status==="overdue").length;
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById("stat-today-att").textContent = att.filter(a=>a.date===today&&a.status==="present").length;
+  document.getElementById("dash-students").innerHTML = students.slice(0,5).map(s=>
+    `<tr><td>${s.name}</td><td>${s.roll_number}</td><td>${s.class}-${s.section}</td><td>${s.email}</td></tr>`
+  ).join("") || `<tr><td colspan="4" style="text-align:center;color:#9ca3af">No students yet</td></tr>`;
+}
+
+// ── Students ─────────────────────────────────────────────────────
+async function loadStudents() {
+  const students = await apiFetch("/admin/students");
+  allStudents = students;
+  document.getElementById("students-table").innerHTML = students.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td><td>${s.name}</td><td>${s.roll_number}</td>
+      <td>${s.class}-${s.section}</td><td>${s.email}</td><td>${s.phone||"—"}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="viewStudent(${s.id})">👁</button>
+        <button class="btn btn-outline btn-sm" onclick="editStudent(${s.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id},'${s.name}')">🗑</button>
+      </td>
+    </tr>`).join("") || `<tr><td colspan="7" style="text-align:center;color:#9ca3af">No students found</td></tr>`;
+}
+
+function openAddStudent() {
+  document.getElementById("student-modal-title").textContent = "Add Student";
+  document.getElementById("edit-student-id").value = "";
+  ["sm-name","sm-email","sm-roll","sm-pass","sm-class","sm-section","sm-phone","sm-address"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("sm-pass").placeholder = "Required";
+  openModal("modal-student");
+}
+
+async function editStudent(id) {
+  const s = await apiFetch("/admin/students/"+id);
+  document.getElementById("student-modal-title").textContent = "Edit Student";
+  document.getElementById("edit-student-id").value = id;
+  document.getElementById("sm-name").value = s.name;
+  document.getElementById("sm-email").value = s.email;
+  document.getElementById("sm-roll").value = s.roll_number;
+  document.getElementById("sm-pass").value = "";
+  document.getElementById("sm-pass").placeholder = "Leave blank to keep current";
+  document.getElementById("sm-class").value = s.class;
+  document.getElementById("sm-section").value = s.section;
+  document.getElementById("sm-phone").value = s.phone||"";
+  document.getElementById("sm-address").value = s.address||"";
+  openModal("modal-student");
+}
+
+async function viewStudent(id) {
+  const s = await apiFetch("/admin/students/"+id);
+  document.getElementById("view-student-content").innerHTML = `
+    <table style="width:100%;font-size:0.9rem">
+      <tr><td style="padding:6px;color:#6b7280;width:40%">Name</td><td><strong>${s.name}</strong></td></tr>
+      <tr><td style="padding:6px;color:#6b7280">Email</td><td>${s.email}</td></tr>
+      <tr><td style="padding:6px;color:#6b7280">Roll Number</td><td>${s.roll_number}</td></tr>
+      <tr><td style="padding:6px;color:#6b7280">Class</td><td>${s.class}-${s.section}</td></tr>
+      <tr><td style="padding:6px;color:#6b7280">Phone</td><td>${s.phone||"—"}</td></tr>
+      <tr><td style="padding:6px;color:#6b7280">Address</td><td>${s.address||"—"}</td></tr>
+      <tr><td style="padding:6px;color:#6b7280">Registered</td><td>${fmtDate(s.created_at)}</td></tr>
+    </table>`;
+  openModal("modal-view-student");
+}
+
+async function saveStudent() {
+  const id = document.getElementById("edit-student-id").value;
+  const body = {
+    name: document.getElementById("sm-name").value, email: document.getElementById("sm-email").value,
+    roll_number: document.getElementById("sm-roll").value, class: document.getElementById("sm-class").value,
+    section: document.getElementById("sm-section").value, phone: document.getElementById("sm-phone").value,
+    address: document.getElementById("sm-address").value
+  };
+  const pass = document.getElementById("sm-pass").value;
+  if (!id && !pass) return showAlert("alert-student-modal","Password is required for new students");
+  if (pass) body.password = pass;
+  try {
+    if (id) await apiFetch("/admin/students/"+id, { method:"PUT", body:JSON.stringify(body) });
+    else     await apiFetch("/admin/students",     { method:"POST", body:JSON.stringify(body) });
+    closeModal("modal-student");
+    loadStudents();
+    showAlert("alert-students", id?"Student updated!":"Student added!", "success");
+  } catch(e) { showAlert("alert-student-modal", e.message); }
+}
+
+async function deleteStudent(id, name) {
+  if (!confirm(`Delete student "${name}"? This will also remove their fees and attendance.`)) return;
+  try {
+    await apiFetch("/admin/students/"+id, { method:"DELETE" });
+    loadStudents();
+    showAlert("alert-students","Student deleted","success");
+  } catch(e) { showAlert("alert-students", e.message); }
+}
+
+// ── Fees ─────────────────────────────────────────────────────────
+async function populateStudentFilter(selectId) {
+  if (!allStudents.length) allStudents = await apiFetch("/admin/students");
+  const sel = document.getElementById(selectId);
+  const cur = sel.value;
+  const opts = allStudents.map(s=>`<option value="${s.id}">${s.name} (${s.roll_number})</option>`).join("");
+  sel.innerHTML = `<option value="">All Students</option>${opts}`;
+  sel.value = cur;
+}
+
+async function loadFees() {
+  const sid = document.getElementById("fee-filter-student").value;
+  const url = sid ? `/fees?student_id=${sid}` : "/fees";
+  const fees = await apiFetch(url);
+  document.getElementById("fees-table").innerHTML = fees.map((f,i)=>`
+    <tr>
+      <td>${i+1}</td><td>${f.student_name}</td><td>${f.roll_number}</td>
+      <td>${f.description}</td><td>${fmtAmount(f.amount)}</td>
+      <td>${fmtDate(f.due_date)}</td><td>${statusBadge(f.status)}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editFee(${f.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteFee(${f.id})">🗑</button>
+      </td>
+    </tr>`).join("") || `<tr><td colspan="8" style="text-align:center;color:#9ca3af">No fee records</td></tr>`;
+}
+
+async function openAddFee() {
+  if (!allStudents.length) allStudents = await apiFetch("/admin/students");
+  document.getElementById("fee-modal-title").textContent = "Add Fee";
+  document.getElementById("edit-fee-id").value = "";
+  document.getElementById("fm-student").innerHTML = allStudents.map(s=>`<option value="${s.id}">${s.name} (${s.roll_number})</option>`).join("");
+  document.getElementById("fm-amount").value = document.getElementById("fm-desc").value = document.getElementById("fm-paid").value = "";
+  document.getElementById("fm-due").value = new Date().toISOString().slice(0,10);
+  document.getElementById("fm-status").value = "pending";
+  openModal("modal-fee");
+}
+
+async function editFee(id) {
+  if (!allStudents.length) allStudents = await apiFetch("/admin/students");
+  const f = await apiFetch("/fees/"+id);
+  document.getElementById("fee-modal-title").textContent = "Edit Fee";
+  document.getElementById("edit-fee-id").value = id;
+  document.getElementById("fm-student").innerHTML = allStudents.map(s=>`<option value="${s.id}"${s.id===f.student_id?" selected":""}>${s.name} (${s.roll_number})</option>`).join("");
+  document.getElementById("fm-amount").value = f.amount;
+  document.getElementById("fm-due").value = f.due_date;
+  document.getElementById("fm-desc").value = f.description;
+  document.getElementById("fm-status").value = f.status;
+  document.getElementById("fm-paid").value = f.paid_date||"";
+  openModal("modal-fee");
+}
+
+async function saveFee() {
+  const id = document.getElementById("edit-fee-id").value;
+  const body = {
+    student_id: document.getElementById("fm-student").value, amount: document.getElementById("fm-amount").value,
+    description: document.getElementById("fm-desc").value, due_date: document.getElementById("fm-due").value,
+    status: document.getElementById("fm-status").value, paid_date: document.getElementById("fm-paid").value || null
+  };
+  try {
+    if (id) await apiFetch("/fees/"+id, { method:"PUT", body:JSON.stringify(body) });
+    else     await apiFetch("/fees",     { method:"POST", body:JSON.stringify(body) });
+    closeModal("modal-fee");
+    loadFees();
+    showAlert("alert-fees", id?"Fee updated!":"Fee added!", "success");
+  } catch(e) { showAlert("alert-fee-modal", e.message); }
+}
+
+async function deleteFee(id) {
+  if (!confirm("Delete this fee record?")) return;
+  try { await apiFetch("/fees/"+id, { method:"DELETE" }); loadFees(); showAlert("alert-fees","Fee deleted","success"); }
+  catch(e) { showAlert("alert-fees", e.message); }
+}
+
+// ── Attendance ───────────────────────────────────────────────────
+async function loadAttendance() {
+  const sid = document.getElementById("att-filter-student").value;
+  const url = sid ? `/attendance?student_id=${sid}` : "/attendance";
+  const att = await apiFetch(url);
+  document.getElementById("att-table").innerHTML = att.map((a,i)=>`
+    <tr>
+      <td>${i+1}</td><td>${a.student_name}</td><td>${a.roll_number}</td>
+      <td>${fmtDate(a.date)}</td><td>${statusBadge(a.status)}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editAtt(${a.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAtt(${a.id})">🗑</button>
+      </td>
+    </tr>`).join("") || `<tr><td colspan="6" style="text-align:center;color:#9ca3af">No records</td></tr>`;
+}
+
+async function openAddAtt() {
+  if (!allStudents.length) {
+    allStudents = await apiFetch("/admin/students");
+  }
+
+  document.getElementById("bulk-date").value =
+    new Date().toISOString().slice(0, 10);
+
+  document.getElementById("bulk-att-table").innerHTML = allStudents.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${s.name}</td>
+      <td>${s.roll_number}</td>
+      <td>
+        <select data-id="${s.id}" class="form-control">
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+          <option value="late">Late</option>
+        </select>
+      </td>
+    </tr>
+  `).join("");
+
+  openModal("modal-att");
+}
+
+async function saveBulkAttendance() {
+  const date = document.getElementById("bulk-date").value;
+
+  const records = Array.from(
+    document.querySelectorAll("#bulk-att-table select")
+  ).map(sel => ({
+    student_id: sel.dataset.id,
+    status: sel.value
+  }));
+
+  try {
+    await apiFetch("/attendance/bulk", {
+      method: "POST",
+      body: JSON.stringify({ date, records })
+    });
+
+    closeModal("modal-att");
+    loadAttendance();
+    showAlert("alert-att", "Attendance saved!", "success");
+
+  } catch (e) {
+    showAlert("alert-att", e.message);
+  }
+}
+
+async function editAtt(id) {
+  if (!allStudents.length) allStudents = await apiFetch("/admin/students");
+  const a = await apiFetch("/attendance/"+id);
+  document.getElementById("att-modal-title").textContent = "Edit Attendance";
+  document.getElementById("edit-att-id").value = id;
+  document.getElementById("am-student").innerHTML = allStudents.map(s=>`<option value="${s.id}"${s.id===a.student_id?" selected":""}>${s.name} (${s.roll_number})</option>`).join("");
+  document.getElementById("am-date").value = a.date;
+  document.getElementById("am-status").value = a.status;
+  openModal("modal-att");
+}
+
+async function saveAttendance() {
+  const id = document.getElementById("edit-att-id").value;
+  const body = { student_id: document.getElementById("am-student").value, date: document.getElementById("am-date").value, status: document.getElementById("am-status").value };
+  try {
+    if (id) await apiFetch("/attendance/"+id, { method:"PUT", body:JSON.stringify(body) });
+    else     await apiFetch("/attendance",     { method:"POST", body:JSON.stringify(body) });
+    closeModal("modal-att");
+    loadAttendance();
+    showAlert("alert-att", id?"Updated!":"Attendance recorded!", "success");
+  } catch(e) { showAlert("alert-att-modal", e.message); }
+}
+
+async function deleteAtt(id) {
+  if (!confirm("Delete this attendance record?")) return;
+  try { await apiFetch("/attendance/"+id, { method:"DELETE" }); loadAttendance(); showAlert("alert-att","Deleted","success"); }
+  catch(e) { showAlert("alert-att", e.message); }
+}
+
+// ── Admin Profile ────────────────────────────────────────────────
+async function loadAdminProfile() {
+  const data = await apiFetch("/admin/profile");
+  document.getElementById("ap-name").value  = data.name||"";
+  document.getElementById("ap-email").value = data.email||"";
+  document.getElementById("ap-phone").value = data.phone||"";
+}
+
+async function saveAdminProfile() {
+  try {
+    const data = await apiFetch("/admin/profile", { method:"PUT", body:JSON.stringify({ name:document.getElementById("ap-name").value, phone:document.getElementById("ap-phone").value }) });
+    setUser(data.admin);
+    document.getElementById("sidebar-name").textContent = data.admin.name;
+    showAlert("alert-profile","Profile updated!","success");
+  } catch(e) { showAlert("alert-profile", e.message); }
+}
+
+// ── New Admin Profile ────────────────────────────────────────────────
+async function loadAdmins() {
+  const admins = await apiFetch("/admin");
+
+  document.getElementById("admins-table").innerHTML = admins.map((a,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${a.name}</td>
+      <td>${a.email}</td>
+      <td>${a.phone || "—"}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="4" style="text-align:center;color:#9ca3af">No admins</td></tr>`;
+}
+function openAddAdmin() {
+  ["am-name","am-email","am-password","am-phone"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+  openModal("modal-admin");
+}
+async function saveAdmin() {
+  const body = {
+    name: document.getElementById("am-name").value,
+    email: document.getElementById("am-email").value,
+    password: document.getElementById("am-password").value,
+    phone: document.getElementById("am-phone").value
+  };
+
+  try {
+    await apiFetch("/admin/create", {
+      method: "POST",
+      body: JSON.stringify(body)
+    });
+
+    closeModal("modal-admin");
+    loadAdmins();
+    showAlert("alert-admins", "Admin created!", "success");
+
+  } catch (e) {
+    showAlert("alert-admin-modal", e.message);
+  }
+}
+loadDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Management System</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <style>
+    body { background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .auth-card { background: #fff; border-radius: 16px; padding: 36px; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .auth-logo { text-align: center; margin-bottom: 24px; }
+    .auth-logo .icon { font-size: 3rem; }
+    .auth-logo h1 { font-size: 1.5rem; font-weight: 700; color: #1f2937; margin-top: 8px; }
+    .auth-logo p  { color: #6b7280; font-size: 0.85rem; }
+    .role-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+    .role-tabs button { padding: 10px; background: #fff; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: #6b7280; transition: all 0.15s; }
+    .role-tabs button.active { background: #4f46e5; color: #fff; }
+    .form-tabs { display: flex; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; }
+    .form-tabs button { flex: 1; padding: 9px; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: #6b7280; transition: all 0.15s; }
+    .form-tabs button.active { color: #4f46e5; border-bottom-color: #4f46e5; }
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+    .link-btn { background: none; border: none; color: #4f46e5; cursor: pointer; font-size: 0.85rem; text-decoration: underline; padding: 0; }
+  </style>
+</head>
+<body>
+<div class="auth-card">
+  <div class="auth-logo">
+    <div class="icon">🏫</div>
+    <h1>School Management</h1>
+    <p>Sign in to your account</p>
+  </div>
+
+  <!-- Role Switcher -->
+  <div class="role-tabs">
+    <button id="btn-student" class="active" onclick="switchRole('student')">🎓 Student</button>
+    <button id="btn-admin"   onclick="switchRole('admin')">🛡️ Admin</button>
+  </div>
+
+  <!-- Alert -->
+  <div id="alert" class="alert"></div>
+
+  <!-- ── Student Panel ────────────────────────────── -->
+  <div id="panel-student">
+    <div class="form-tabs">
+      <button id="tab-login"    class="active" onclick="switchTab('login')">Login</button>
+      <button id="tab-register" onclick="switchTab('register')">Register</button>
+      <button id="tab-forgot"   onclick="switchTab('forgot')">Forgot Password</button>
+    </div>
+
+    <!-- Login -->
+    <div id="form-login" class="form-panel active">
+      <div class="form-group"><label>Email</label><input id="login-email" type="email" class="form-control" placeholder="student@school.com" /></div>
+      <div class="form-group"><label>Password</label><input id="login-pass" type="password" class="form-control" placeholder="••••••••" /></div>
+      <button class="btn btn-primary" style="width:100%" onclick="studentLogin()">Login</button>
+    </div>
+
+    <!-- Register -->
+    <div id="form-register" class="form-panel">
+      <div class="form-row">
+        <div class="form-group"><label>Full Name</label><input id="reg-name" class="form-control" placeholder="John Doe" /></div>
+        <div class="form-group"><label>Email</label><input id="reg-email" type="email" class="form-control" placeholder="john@example.com" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Roll Number</label><input id="reg-roll" class="form-control" placeholder="2024001" /></div>
+        <div class="form-group"><label>Password</label><input id="reg-pass" type="password" class="form-control" placeholder="••••••••" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Class</label><input id="reg-class" class="form-control" placeholder="10" /></div>
+        <div class="form-group"><label>Section</label><input id="reg-section" class="form-control" placeholder="A" /></div>
+      </div>
+      <div class="form-group"><label>Phone (optional)</label><input id="reg-phone" class="form-control" placeholder="+91 98765 43210" /></div>
+      <button class="btn btn-primary" style="width:100%" onclick="studentRegister()">Create Account</button>
+    </div>
+
+    <!-- Forgot Password -->
+    <div id="form-forgot" class="form-panel">
+      <div id="forgot-step1">
+        <div class="form-group"><label>Your Email</label><input id="forgot-email" type="email" class="form-control" placeholder="student@school.com" /></div>
+        <button class="btn btn-primary" style="width:100%" onclick="forgotPassword('student')">Send Reset Token</button>
+      </div>
+      <div id="forgot-step2" style="display:none">
+        <div class="form-group"><label>Reset Token</label><input id="reset-token" class="form-control" placeholder="Paste token here" /></div>
+        <div class="form-group"><label>New Password</label><input id="new-pass" type="password" class="form-control" placeholder="••••••••" /></div>
+        <button class="btn btn-primary" style="width:100%" onclick="resetPassword('student')">Reset Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Admin Panel ──────────────────────────────── -->
+  <div id="panel-admin" style="display:none">
+    <div id="admin-alert" class="alert"></div>
+    <div id="admin-login-form">
+      <div class="form-group"><label>Admin Email</label><input id="admin-email" type="email" class="form-control" placeholder="admin@school.com" /></div>
+      <div class="form-group"><label>Password</label><input id="admin-pass" type="password" class="form-control" placeholder="••••••••" /></div>
+      <button class="btn btn-primary" style="width:100%; margin-bottom:10px" onclick="adminLogin()">Login as Admin</button>
+      <div style="text-align:center"><button class="link-btn" onclick="switchAdminForgot()">Forgot Password?</button></div>
+    </div>
+    <div id="admin-forgot-form" style="display:none">
+      <div id="admin-forgot-step1">
+        <div class="form-group"><label>Admin Email</label><input id="admin-forgot-email" type="email" class="form-control" /></div>
+        <button class="btn btn-primary" style="width:100%; margin-bottom:10px" onclick="forgotPassword('admin')">Send Reset Token</button>
+        <div style="text-align:center"><button class="link-btn" onclick="switchAdminForgot()">Back to Login</button></div>
+      </div>
+      <div id="admin-forgot-step2" style="display:none">
+        <div class="form-group"><label>Reset Token</label><input id="admin-reset-token" class="form-control" /></div>
+        <div class="form-group"><label>New Password</label><input id="admin-new-pass" type="password" class="form-control" /></div>
+        <button class="btn btn-primary" style="width:100%" onclick="resetPassword('admin')">Reset Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/js/api.js"></script>
+<script>
+  // Redirect if already logged in
+  if (getToken()) {
+    redirectTo(getRole() === "admin" ? "/admin/dashboard.html" : "/student/dashboard.html");
+  }
+
+  let currentRole = "student";
+
+  function switchRole(role) {
+    currentRole = role;
+    document.getElementById("panel-student").style.display = role === "student" ? "block" : "none";
+    document.getElementById("panel-admin").style.display   = role === "admin"   ? "block" : "none";
+    document.getElementById("btn-student").classList.toggle("active", role === "student");
+    document.getElementById("btn-admin").classList.toggle("active", role === "admin");
+  }
+
+  function switchTab(tab) {
+    ["login","register","forgot"].forEach(t => {
+      document.getElementById("form-" + t).classList.toggle("active", t === tab);
+      document.getElementById("tab-" + t).classList.toggle("active", t === tab);
+    });
+  }
+
+  function switchAdminForgot() {
+    const lf = document.getElementById("admin-login-form");
+    const ff = document.getElementById("admin-forgot-form");
+    lf.style.display = lf.style.display === "none" ? "block" : "none";
+    ff.style.display = ff.style.display === "none" ? "block" : "none";
+  }
+
+  async function studentLogin() {
+    try {
+      const data = await apiFetch("/student/login", {
+        method: "POST",
+        body: JSON.stringify({ email: document.getElementById("login-email").value, password: document.getElementById("login-pass").value })
+      });
+      setToken(data.token); setUser(data.student); setRole("student");
+      redirectTo("/student/dashboard.html");
+    } catch(e) { showAlert("alert", e.message); }
+  }
+
+  async function studentRegister() {
+    try {
+      const data = await apiFetch("/student/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name: document.getElementById("reg-name").value,
+          email: document.getElementById("reg-email").value,
+          password: document.getElementById("reg-pass").value,
+          roll_number: document.getElementById("reg-roll").value,
+          class: document.getElementById("reg-class").value,
+          section: document.getElementById("reg-section").value,
+          phone: document.getElementById("reg-phone").value
+        })
+      });
+      setToken(data.token); setUser(data.student); setRole("student");
+      redirectTo("/student/dashboard.html");
+    } catch(e) { showAlert("alert", e.message); }
+  }
+
+  async function adminLogin() {
+    try {
+      const data = await apiFetch("/admin/login", {
+        method: "POST",
+        body: JSON.stringify({ email: document.getElementById("admin-email").value, password: document.getElementById("admin-pass").value })
+      });
+      setToken(data.token); setUser(data.admin); setRole("admin");
+      redirectTo("/admin/dashboard.html");
+    } catch(e) { showAlert("admin-alert", e.message); }
+  }
+
+  async function forgotPassword(role) {
+    const emailId = role === "admin" ? "admin-forgot-email" : "forgot-email";
+    const email = document.getElementById(emailId).value;
+    try {
+      const data = await apiFetch(`/${role}/forgot-password`, { method: "POST", body: JSON.stringify({ email }) });
+      showAlert("alert", "Reset link sent to your email", "success");
+      document.getElementById(role === "admin" ? "admin-forgot-step1" : "forgot-step1").style.display = "none";
+      document.getElementById(role === "admin" ? "admin-forgot-step2" : "forgot-step2").style.display = "block";
+    } catch(e) { showAlert("alert", e.message); }
+  }
+
+  async function resetPassword(role) {
+    const tokenId = role === "admin" ? "admin-reset-token" : "reset-token";
+    const passId  = role === "admin" ? "admin-new-pass"    : "new-pass";
+    try {
+      await apiFetch(`/${role}/reset-password`, {
+        method: "POST",
+        body: JSON.stringify({ token: document.getElementById(tokenId).value, new_password: document.getElementById(passId).value })
+      });
+      showAlert("alert", "Password reset! Please login.", "success");
+      setTimeout(() => { switchTab("login"); switchRole(role); }, 1500);
+    } catch(e) { showAlert("alert", e.message); }
+  }
+</script>
+</body>
+</html>

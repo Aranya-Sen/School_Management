@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+
+<!-- ── Sidebar ────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-brand"><span>🎓</span> Student Portal</div>
+  <nav>
+    <a href="#" class="active" onclick="showSection('dashboard')">📊 Dashboard</a>
+    <a href="#" onclick="showSection('profile')">👤 My Profile</a>
+    <a href="#" onclick="showSection('fees')">💰 Fee History</a>
+    <a href="#" onclick="showSection('attendance')">📅 Attendance</a>
+    <a href="#" onclick="showSection('change-pass')">🔑 Change Password</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">Logged in as</div>
+    <div class="user-name" id="sidebar-name">—</div>
+    <button class="btn btn-outline btn-sm" style="margin-top:8px;width:100%" onclick="logout()">Logout</button>
+  </div>
+</aside>
+
+<!-- ── Main ───────────────────────────────────────────────────── -->
+<main class="main-content">
+
+  <!-- DASHBOARD -->
+  <section id="s-dashboard">
+    <div class="page-header"><h1>Welcome back, <span id="dash-name">—</span> 👋</h1><p>Here's your quick overview</p></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon blue">📚</div><div><div class="stat-value" id="stat-class">—</div><div class="stat-label">Class & Section</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="stat-present">—</div><div class="stat-label">Days Present</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow">💰</div><div><div class="stat-value" id="stat-fees-paid">—</div><div class="stat-label">Fees Paid</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-value" id="stat-fees-due">—</div><div class="stat-label">Fees Pending</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>Recent Attendance (Last 10)</h2></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Status</th></tr></thead><tbody id="dash-att-table"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="s-profile" style="display:none">
+    <div class="page-header"><h1>My Profile</h1><p>View and update your personal details</p></div>
+    <div id="alert-profile" class="alert"></div>
+    <div class="card" style="max-width:560px">
+      <div class="form-row">
+        <div class="form-group"><label>Full Name</label><input id="p-name" class="form-control" /></div>
+        <div class="form-group"><label>Email</label><input id="p-email" class="form-control" disabled /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Roll Number</label><input id="p-roll" class="form-control" disabled /></div>
+        <div class="form-group"><label>Class &amp; Section</label><input id="p-class" class="form-control" disabled /></div>
+      </div>
+      <div class="form-group"><label>Phone</label><input id="p-phone" class="form-control" placeholder="+91 98765 43210" /></div>
+      <div class="form-group"><label>Address</label><textarea id="p-address" class="form-control" rows="2" placeholder="Your address"></textarea></div>
+      <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </section>
+
+  <!-- FEES -->
+  <section id="s-fees" style="display:none">
+    <div class="page-header"><h1>Fee Payment History</h1><p>All your fee records</p></div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Description</th><th>Amount</th><th>Due Date</th><th>Paid Date</th><th>Status</th></tr></thead>
+          <tbody id="fees-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section id="s-attendance" style="display:none">
+    <div class="page-header"><h1>Attendance History</h1><p>Your full attendance record</p></div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="att-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANGE PASSWORD -->
+  <section id="s-change-pass" style="display:none">
+    <div class="page-header"><h1>Change Password</h1></div>
+    <div id="alert-pass" class="alert"></div>
+    <div class="card" style="max-width:420px">
+      <div class="form-group"><label>Current Password</label><input id="cp-current" type="password" class="form-control" /></div>
+      <div class="form-group"><label>New Password</label><input id="cp-new" type="password" class="form-control" /></div>
+      <div class="form-group"><label>Confirm New Password</label><input id="cp-confirm" type="password" class="form-control" /></div>
+      <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+    </div>
+  </section>
+
+</main>
+
+<script src="/assets/js/api.js"></script>
+<script>
+requireAuth("student", "/index.html");
+
+const user = getUser();
+if (user) {
+  document.getElementById("sidebar-name").textContent = user.name;
+  document.getElementById("dash-name").textContent = user.name;
+}
+
+const sections = ["dashboard","profile","fees","attendance","change-pass"];
+function showSection(name) {
+  sections.forEach(s => document.getElementById("s-" + s).style.display = s === name ? "block" : "none");
+  document.querySelectorAll(".sidebar nav a").forEach((a, i) => a.classList.toggle("active", sections[i] === name));
+  if (name === "dashboard") loadDashboard();
+  if (name === "profile")   loadProfile();
+  if (name === "fees")      loadFees();
+  if (name === "attendance") loadAttendance();
+}
+
+async function loadDashboard() {
+  const [fees, att] = await Promise.all([apiFetch("/student/fees"), apiFetch("/student/attendance")]);
+  const u = getUser();
+  document.getElementById("stat-class").textContent = `${u.class}-${u.section}`;
+  document.getElementById("stat-present").textContent = att.filter(a => a.status === "present").length;
+  document.getElementById("stat-fees-paid").textContent = fees.filter(f => f.status === "paid").length;
+  document.getElementById("stat-fees-due").textContent = fees.filter(f => f.status === "pending" || f.status === "overdue").length;
+  document.getElementById("dash-att-table").innerHTML = att.slice(0,10).map(a =>
+    `<tr><td>${fmtDate(a.date)}</td><td>${statusBadge(a.status)}</td></tr>`
+  ).join("") || `<tr><td colspan="2" style="text-align:center;color:#9ca3af">No records yet</td></tr>`;
+}
+
+async function loadProfile() {
+  const data = await apiFetch("/student/profile");
+  document.getElementById("p-name").value    = data.name || "";
+  document.getElementById("p-email").value   = data.email || "";
+  document.getElementById("p-roll").value    = data.roll_number || "";
+  document.getElementById("p-class").value   = `${data.class}-${data.section}`;
+  document.getElementById("p-phone").value   = data.phone || "";
+  document.getElementById("p-address").value = data.address || "";
+}
+
+async function saveProfile() {
+  try {
+    const data = await apiFetch("/student/profile", {
+      method: "PUT",
+      body: JSON.stringify({ name: document.getElementById("p-name").value, phone: document.getElementById("p-phone").value, address: document.getElementById("p-address").value })
+    });
+    setUser(data.student);
+    document.getElementById("sidebar-name").textContent = data.student.name;
+    showAlert("alert-profile", "Profile updated!", "success");
+  } catch(e) { showAlert("alert-profile", e.message); }
+}
+
+async function loadFees() {
+  const fees = await apiFetch("/student/fees");
+  document.getElementById("fees-table").innerHTML = fees.length
+    ? fees.map((f,i) => `<tr><td>${i+1}</td><td>${f.description}</td><td>${fmtAmount(f.amount)}</td><td>${fmtDate(f.due_date)}</td><td>${fmtDate(f.paid_date)}</td><td>${statusBadge(f.status)}</td></tr>`).join("")
+    : `<tr><td colspan="6" style="text-align:center;color:#9ca3af">No fee records found</td></tr>`;
+}
+
+async function loadAttendance() {
+  const att = await apiFetch("/student/attendance");
+  document.getElementById("att-table").innerHTML = att.length
+    ? att.map((a,i) => `<tr><td>${i+1}</td><td>${fmtDate(a.date)}</td><td>${statusBadge(a.status)}</td></tr>`).join("")
+    : `<tr><td colspan="3" style="text-align:center;color:#9ca3af">No attendance records found</td></tr>`;
+}
+
+async function changePassword() {
+  const np = document.getElementById("cp-new").value;
+  const cp = document.getElementById("cp-confirm").value;
+  if (np !== cp) return showAlert("alert-pass", "New passwords do not match");
+  try {
+    await apiFetch("/student/change-password", { method: "PUT", body: JSON.stringify({ current_password: document.getElementById("cp-current").value, new_password: np }) });
+    showAlert("alert-pass", "Password changed!", "success");
+    document.getElementById("cp-current").value = document.getElementById("cp-new").value = document.getElementById("cp-confirm").value = "";
+  } catch(e) { showAlert("alert-pass", e.message); }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
