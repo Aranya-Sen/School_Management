@@ -1,6 +1,6 @@
 # 🏫 School Management System
 
-A full-stack School Management System built with **Node.js + Express + SQLite** backend and **vanilla HTML/CSS/JS** frontend.
+A full-stack School Management System built with **Node.js + Express + PostgreSQL** backend and **vanilla HTML/CSS/JS** frontend.
 
 ---
 
@@ -10,7 +10,7 @@ A full-stack School Management System built with **Node.js + Express + SQLite** 
 school-management/
 ├── backend/
 │   ├── server.js           # Entry point
-│   ├── db.js               # SQLite setup & schema
+│   ├── db.js               # PostgreSQL
 │   ├── school.db           # Auto-generated database file
 │   ├── package.json
 │   ├── middleware/
