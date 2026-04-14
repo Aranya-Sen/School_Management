@@ -242,6 +242,41 @@
   </div>
 </div>
 
+  <div id="modal-edit-att" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Attendance</h3>
+      <button class="modal-close" onclick="closeModal('modal-edit-att')">×</button>
+    </div>
+
+    <input type="hidden" id="edit-att-id" />
+
+    <div class="form-group">
+      <label>Student</label>
+      <select id="am-student" class="form-control"></select>
+    </div>
+
+    <div class="form-group">
+      <label>Date</label>
+      <input id="am-date" type="date" class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label>Status</label>
+      <select id="am-status" class="form-control">
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+        <option value="late">Late</option>
+      </select>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-att')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAttendance()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Add Admin -->
 <div id="modal-admin" class="modal-overlay">
   <div class="modal">
@@ -541,13 +576,22 @@ async function saveBulkAttendance() {
 
 async function editAtt(id) {
   if (!allStudents.length) allStudents = await apiFetch("/admin/students");
-  const a = await apiFetch("/attendance/"+id);
-  document.getElementById("att-modal-title").textContent = "Edit Attendance";
+
+  const a = await apiFetch("/attendance/" + id);
+
   document.getElementById("edit-att-id").value = id;
-  document.getElementById("am-student").innerHTML = allStudents.map(s=>`<option value="${s.id}"${s.id===a.student_id?" selected":""}>${s.name} (${s.roll_number})</option>`).join("");
+
+  document.getElementById("am-student").innerHTML =
+    allStudents.map(s =>
+      `<option value="${s.id}" ${s.id === a.student_id ? "selected" : ""}>
+        ${s.name} (${s.roll_number})
+      </option>`
+    ).join("");
+
   document.getElementById("am-date").value = a.date;
   document.getElementById("am-status").value = a.status;
-  openModal("modal-att");
+
+  openModal("modal-edit-att");
 }
 
 async function saveAttendance() {
