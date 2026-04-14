@@ -482,7 +482,7 @@ async function loadAttendance() {
       <td>${i+1}</td><td>${a.student_name}</td><td>${a.roll_number}</td>
       <td>${fmtDate(a.date)}</td><td>${statusBadge(a.status)}</td>
       <td>
-        <button class="btn btn-outline btn-sm" onclick="editAtt(${a.id})">✏️</button>
+        <!--<button class="btn btn-outline btn-sm" onclick="editAtt(${a.id})">✏️</button>-->
         <button class="btn btn-danger btn-sm" onclick="deleteAtt(${a.id})">🗑</button>
       </td>
     </tr>`).join("") || `<tr><td colspan="6" style="text-align:center;color:#9ca3af">No records</td></tr>`;
