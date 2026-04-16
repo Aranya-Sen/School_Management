@@ -128,7 +128,7 @@ await sendMail(
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -167,7 +167,7 @@ router.post("/reset-password", async (req, res) => {
     res.json({ message: "Password reset successfully" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 });
 
